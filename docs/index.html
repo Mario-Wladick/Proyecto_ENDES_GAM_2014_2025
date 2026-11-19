@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Mario Wilfredo Ramírez Puma">
+<meta name="author" content="Fiorella Yaneth Paredes Coaguila">
+<meta name="author" content="Paolo Fontanil Barrera">
+<meta name="author" content="Jefry Quispe Ramos">
+
+<title>ANÁLISIS DE LA AUSENCIA REPORTADA DE COMPRA DE MEDICAMENTOS ANTIHIPERTENSIVOS EN EL PERÚ, 2014–2025, MEDIANTE MODELOS ADITIVOS GENERALIZADOS (GAM)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="informe_ENDES_files/libs/clipboard/clipboard.min.js"></script>
+<script src="informe_ENDES_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="informe_ENDES_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="informe_ENDES_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="informe_ENDES_files/libs/quarto-html/popper.min.js"></script>
+<script src="informe_ENDES_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="informe_ENDES_files/libs/quarto-html/anchor.min.js"></script>
+<link href="informe_ENDES_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="informe_ENDES_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="informe_ENDES_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="informe_ENDES_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="informe_ENDES_files/libs/bootstrap/bootstrap-9e3ffae467580fdb927a41352e75a2e0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+<div class="quarto-alternate-formats"><h2>Otros formatos</h2><ul><li><a href="informe_ENDES.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">ANÁLISIS DE LA AUSENCIA REPORTADA DE COMPRA DE MEDICAMENTOS ANTIHIPERTENSIVOS EN EL PERÚ, 2014–2025, MEDIANTE MODELOS ADITIVOS GENERALIZADOS (GAM)</h1>
+<p class="subtitle lead">Universidad Nacional del Altiplano – Escuela Profesional de Ingeniería Estadística e Informática · Ciencia de Datos · 2026 · Docente: Ing. Fred Torres Cruz</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autores/as</div>
+    <div class="quarto-title-meta-contents">
+             <p>Mario Wilfredo Ramírez Puma </p>
+             <p>Fiorella Yaneth Paredes Coaguila </p>
+             <p>Paolo Fontanil Barrera </p>
+             <p>Jefry Quispe Ramos </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="resumen-ejecutivo" class="level2">
+<h2 class="anchored" data-anchor-id="resumen-ejecutivo">1. Resumen ejecutivo</h2>
+<p>Se analizaron microdatos de la Encuesta Demográfica y de Salud Familiar (ENDES) correspondientes a 2014–2025 para estudiar la ausencia reportada de compra de medicamentos para controlar la presión alta. La población analítica incluyó personas de 15 años o más con diagnóstico previo reportado de hipertensión, respuesta válida sobre compra y peso muestral positivo. Tras integrar y depurar los módulos anuales se obtuvieron <strong>32 806 registros</strong>. En R se ajustó un modelo aditivo generalizado (GAM) con <strong>15 predictoras</strong>, frente a un GAM básico de año, edad y sexo. En validación temporal, el GAM ampliado mejoró el log-loss (0,5264 frente a 0,5397) y el Brier Score (0,1743 frente a 0,1799), aunque subestimó las proporciones observadas durante 2023–2025. La proporción ponderada descendió de 34,41 % en 2014 a 25,01 % en 2020 y alcanzó 29,97 % en 2025. El trabajo es descriptivo y predictivo, sin interpretación causal ni demostración de adherencia farmacológica.</p>
+</section>
+<section id="contexto-y-pregunta-de-investigación" class="level2">
+<h2 class="anchored" data-anchor-id="contexto-y-pregunta-de-investigación">2. Contexto y pregunta de investigación</h2>
+<p>La hipertensión arterial constituye un problema relevante para la salud pública. La ENDES ofrece información periódica sobre diagnóstico y compra de medicamentos, pero las preguntas del cuestionario deben interpretarse literalmente. En este trabajo, la pregunta QS104 registra si los participantes compraron medicamentos para controlar su presión alta; responder que no compraron no demuestra falta de tratamiento, falta de adherencia ni ausencia de medicamentos obtenidos por otras vías.</p>
+<p>La pregunta de investigación es: <strong>¿cómo se relacionan el año de encuesta y las características demográficas, sanitarias, educativas, territoriales y de hábitos con la probabilidad de reportar ausencia de compra de medicamentos para controlar la presión alta entre 2014 y 2025?</strong> Los doce levantamientos de ENDES constituyen cortes transversales sucesivos: no representan necesariamente seguimiento longitudinal de las mismas personas.</p>
+</section>
+<section id="problema-y-objetivos" class="level2">
+<h2 class="anchored" data-anchor-id="problema-y-objetivos">3. Problema y objetivos</h2>
+<p><strong>Problema.</strong> La proporción de personas diagnosticadas con hipertensión que reportan no comprar medicamentos puede variar entre años y subgrupos. Las bases históricas difieren en nombres de variables, cuestionarios y patrones de respuesta, lo que exige armonización antes del modelado.</p>
+<p><strong>Objetivo general.</strong> Analizar la evolución de la ausencia reportada de compra de medicamentos antihipertensivos en el Perú durante 2014–2025 mediante un GAM con quince variables predictoras.</p>
+<p><strong>Objetivos específicos.</strong> Consolidar y validar los módulos ENDES; definir una respuesta binaria; describir porcentajes ponderados anuales; ajustar y comparar un GAM básico y otro ampliado; examinar los efectos parciales del año y la edad; y evaluar la capacidad predictiva y las limitaciones del diseño muestral.</p>
+</section>
+<section id="construcción-y-calidad-de-la-muestra-analítica" class="level2">
+<h2 class="anchored" data-anchor-id="construcción-y-calidad-de-la-muestra-analítica">4. Construcción y calidad de la muestra analítica</h2>
+<p>Se utilizaron los módulos CSALUD01 y, cuando correspondió, información de RECH0 para recuperar variables del diseño y del hogar. La selección exigió diagnóstico de presión alta reportado (QS102=1), respuesta sobre compra de medicamentos (QS104=1 o 2), edad de al menos 15 años, sexo válido y ponderación positiva. Se construyó <code>sin_medicacion = 1</code> para QS104=2 (no compró) y <code>sin_medicacion = 0</code> para QS104=1 (sí compró). El nombre técnico de la variable se conserva por reproducibilidad, pero su interpretación es <em>no compra reportada</em>.</p>
+<table class="caption-top table">
+<caption>Cuadro 1. Flujo de selección y tamaño de la muestra.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Etapa de procesamiento</th>
+<th style="text-align: right;">Registros</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Registros iniciales en los módulos consolidados</td>
+<td style="text-align: right;">406 319</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Diagnóstico previo reportado (QS102=1)</td>
+<td style="text-align: right;">33 089</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Respuesta válida en QS104</td>
+<td style="text-align: right;">33 061</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Edad, sexo y peso muestral válidos</td>
+<td style="text-align: right;"><strong>32 806</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Composición anual.</strong> Cada año aportó entre 2 435 y 3 042 registros analíticos. La diferencia entre 406 319 observaciones iniciales y 32 806 registros finales obedece, principalmente, a la delimitación de personas con diagnóstico previo de hipertensión; no implica que el resto de los participantes tenga información errónea.</p>
+</section>
+<section id="variables-incluidas-en-el-gam" class="level2">
+<h2 class="anchored" data-anchor-id="variables-incluidas-en-el-gam">5. Variables incluidas en el GAM</h2>
+<p>El modelo ampliado utiliza exactamente quince predictoras, seleccionadas de los módulos de salud y hogares. El año y la edad se representaron mediante funciones suaves; las demás variables se incorporaron como factores o términos según su naturaleza. El resultado binario no se incluyó entre las predictoras, para evitar fuga de información.</p>
+<table class="caption-top table">
+<caption>Cuadro 2. Quince variables predictoras del modelo ampliado.</caption>
+<colgroup>
+<col style="width: 7%">
+<col style="width: 43%">
+<col style="width: 7%">
+<col style="width: 42%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">N.º</th>
+<th style="text-align: left;">Predictora</th>
+<th style="text-align: right;">N.º</th>
+<th style="text-align: left;">Predictora</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Año de encuesta</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: left;">Nivel educativo</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">Edad</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: left;">Departamento o región</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">Sexo</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: left;">Área de residencia</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">Diabetes reportada</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">Miembros del hogar</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">Consumo de tabaco, 12 meses</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: left;">Altitud</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">Consumo de alcohol, 12 meses</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: left;">Grupo de consumo de frutas</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">Asistencia escolar</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: left;">Días de consumo de verduras</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">8</td>
+<td style="text-align: left;">Tenencia de seguro de salud</td>
+<td style="text-align: right;"></td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<p>En algunas variables categóricas se creó la categoría <em>No informado</em> para conservar las observaciones, debido a faltantes desiguales por año y sexo. Esta recodificación no recupera la información ausente y puede afectar las asociaciones estimadas; por ello se examinó mediante análisis de sensibilidad. Se evitó incluir simultáneamente dos variables redundantes de consumo de alcohol: la especificación final alcanzó rango <strong>78 de 78</strong> parámetros estimables.</p>
+</section>
+<section id="recolección-programación-y-procesamiento" class="level2">
+<h2 class="anchored" data-anchor-id="recolección-programación-y-procesamiento">6. Recolección, programación y procesamiento</h2>
+<p>Los microdatos secundarios se descargaron de las fuentes oficiales del Instituto Nacional de Estadística e Informática (INEI). Python se utilizó en etapas de lectura, integración y control histórico; el análisis ampliado, las validaciones y las figuras que se presentan aquí se realizaron en R. Se conservaron los archivos originales, las bases integradas y los scripts numerados, facilitando reconstruir cada transformación.</p>
+<p>El flujo comprendió: descarga por año, revisión de códigos, depuración de observaciones, integración de módulos, selección de cohortes, armonización de quince predictoras, ajustes GAM, evaluación temporal y auditoría del diseño complejo de ENDES. Se comprobaron identificadores de conglomerado (<code>QHCLUSTER</code>), estrato (<code>HV022</code>) y factores de ponderación.</p>
+</section>
+<section id="métodos-estadísticos-aplicados" class="level2">
+<h2 class="anchored" data-anchor-id="métodos-estadísticos-aplicados">7. Métodos estadísticos aplicados</h2>
+<p><strong>Análisis descriptivo ponderado.</strong> Para cada año se estimó la proporción de ausencia reportada de compra, considerando pesos y variables del diseño disponibles. Se utilizó el paquete <code>survey</code> de R para errores estándar e intervalos aproximados. El tratamiento de estratos con un solo conglomerado se examinó mediante las alternativas <code>adjust</code> y <code>average</code>.</p>
+<p><strong>Modelado.</strong> Se ajustaron modelos aditivos generalizados con enlace logit y respuesta binaria. El GAM básico incluyó funciones suaves de año y edad y el factor sexo. El modelo ampliado incorporó doce predictores adicionales:</p>
+<p><span class="math display">\[
+\operatorname{logit}\{P(Y_i=1\mid X_i)\}
+= \beta_0+s_1(\text{año}_i)+s_2(\text{edad}_i)+\sum_{j=3}^{15}f_j(X_{ij}).
+\]</span></p>
+<p>Las funciones <span class="math inline">\(f_j\)</span> representan términos paramétricos o suaves: el número quince corresponde a variables predictoras, no a quince funciones de suavizado. En particular, miembros del hogar y altitud se incluyeron con funciones suaves. Los ajustes finales emplearon <code>mgcv</code> y familia <code>quasibinomial(link="logit")</code> para trabajar con ponderaciones no enteras, sin interpretar este procedimiento como una solución completa al diseño complejo.</p>
+<p><strong>Evaluación predictiva.</strong> Primero se realizó una partición aleatoria estratificada por año y respuesta (80 % para entrenamiento, 20 % para prueba). Después se utilizó una validación más exigente: entrenamiento en 2014–2022 y evaluación fuera del período de entrenamiento en 2023–2025. Se compararon log-loss y Brier Score, métricas que penalizan las predicciones probabilísticas incorrectas; en ambas, un valor menor es mejor.</p>
+<p><strong>Inferencia comparativa.</strong> Se calcularon diferencias entre proporciones anuales mediante contrastes de Wald aproximados y corrección de Holm para cuatro comparaciones. El procedimiento inicial supuso independencia entre estimadores de años distintos. Dado que ENDES incorpora rotación de conglomerados, se exploraron correlaciones hipotéticas de −0,3; 0; 0,3 y 0,6 para evaluar la sensibilidad, sin considerarlas estimaciones de covarianza del diseño.</p>
+</section>
+<section id="resultados-de-comparación-de-modelos" class="level2">
+<h2 class="anchored" data-anchor-id="resultados-de-comparación-de-modelos">8. Resultados de comparación de modelos</h2>
+<p>El GAM ampliado obtuvo menores pérdidas predictivas en la evaluación temporal, lo que indica mejor desempeño probabilístico promedio en 2023–2025 frente al GAM básico. Sin embargo, una mejora promedio no asegura calibración adecuada en cada año ni capacidad predictiva para períodos posteriores.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Cuadro 3. Evaluación temporal fuera del entrenamiento, 2023–2025</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Modelo</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Predictoras</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Log-loss</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Brier Score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">GAM básico</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: right;">0,5397</td>
+<td style="text-align: right;">0,1799</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GAM ampliado</td>
+<td style="text-align: center;">15</td>
+<td style="text-align: right;">0,5264</td>
+<td style="text-align: right;">0,1743</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<table class="caption-top table">
+<caption>Cuadro 3. Evaluación temporal fuera del período de entrenamiento, 2023–2025.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Modelo</th>
+<th style="text-align: right;">Predictoras</th>
+<th style="text-align: right;">Log-loss</th>
+<th style="text-align: right;">Brier Score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">GAM básico</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0,5397</td>
+<td style="text-align: right;">0,1799</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GAM ampliado</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;"><strong>0,5264</strong></td>
+<td style="text-align: right;"><strong>0,1743</strong></td>
+</tr>
+</tbody>
+</table>
+<p>En la partición aleatoria de prueba, el modelo de quince predictoras alcanzó un log-loss aproximado de 0,5086 y un Brier Score de 0,1682, frente a 0,5411 y 0,1803 del modelo básico. Las métricas temporales, más exigentes para evaluar cambios recientes, son las principales en esta interpretación.</p>
+</section>
+<section id="evolución-anual-descriptiva-ponderada" class="level2">
+<h2 class="anchored" data-anchor-id="evolución-anual-descriptiva-ponderada">9. Evolución anual descriptiva ponderada</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-evolucion-endes" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-evolucion-endes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="informe_ENDES_files/figure-html/fig-evolucion-endes-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-evolucion-endes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;1: Figura 1. Proporción anual ponderada de ausencia reportada de compra, con intervalos aproximados del 95 % sujetos a los supuestos del diseño.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Interpretación.</strong> El comportamiento no es estrictamente lineal: existen incrementos en 2017 y 2021 y fluctuaciones entre 2022 y 2025. Por ese motivo, las funciones suaves de un GAM resultan útiles para explorar cambios temporales no monótonos. El año 2020 coincide con un contexto excepcional, pero este estudio no permite atribuirle causalmente la disminución observada.</p>
+</section>
+<section id="estimaciones-anuales-e-incertidumbre-muestral" class="level2">
+<h2 class="anchored" data-anchor-id="estimaciones-anuales-e-incertidumbre-muestral">10. Estimaciones anuales e incertidumbre muestral</h2>
+<p>El Cuadro 4 resume los registros por año y las estimaciones obtenidas con <code>survey</code>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Cuadro 4. Evolución de la ausencia reportada de compra, ENDES 2014–2025</caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;" data-quarto-table-cell-role="th">Año</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">N</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Porcentaje ponderado</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">IC aproximado 95 %</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">2014</td>
+<td style="text-align: right;">3 042</td>
+<td style="text-align: right;">34.41 %</td>
+<td style="text-align: center;">[31.76; 37.05]</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2015</td>
+<td style="text-align: right;">2 816</td>
+<td style="text-align: right;">33.47 %</td>
+<td style="text-align: center;">[30.89; 36.04]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2016</td>
+<td style="text-align: right;">2 572</td>
+<td style="text-align: right;">29.82 %</td>
+<td style="text-align: center;">[27.39; 32.24]</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2017</td>
+<td style="text-align: right;">2 560</td>
+<td style="text-align: right;">31.83 %</td>
+<td style="text-align: center;">[28.70; 34.97]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2018</td>
+<td style="text-align: right;">2 905</td>
+<td style="text-align: right;">30.29 %</td>
+<td style="text-align: center;">[27.69; 32.89]</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2019</td>
+<td style="text-align: right;">2 893</td>
+<td style="text-align: right;">27.10 %</td>
+<td style="text-align: center;">[24.65; 29.54]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2020</td>
+<td style="text-align: right;">2 717</td>
+<td style="text-align: right;">25.01 %</td>
+<td style="text-align: center;">[22.68; 27.34]</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2021</td>
+<td style="text-align: right;">2 435</td>
+<td style="text-align: right;">29.73 %</td>
+<td style="text-align: center;">[26.83; 32.64]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2022</td>
+<td style="text-align: right;">2 756</td>
+<td style="text-align: right;">28.80 %</td>
+<td style="text-align: center;">[26.19; 31.42]</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2023</td>
+<td style="text-align: right;">2 781</td>
+<td style="text-align: right;">28.13 %</td>
+<td style="text-align: center;">[25.58; 30.68]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2024</td>
+<td style="text-align: right;">2 706</td>
+<td style="text-align: right;">28.92 %</td>
+<td style="text-align: center;">[26.15; 31.69]</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2025</td>
+<td style="text-align: right;">2 623</td>
+<td style="text-align: right;">29.97 %</td>
+<td style="text-align: center;">[26.99; 32.94]</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="identificación-del-diseño-y-sensibilidad" class="level2">
+<h2 class="anchored" data-anchor-id="identificación-del-diseño-y-sensibilidad">11. Identificación del diseño y sensibilidad</h2>
+<p>La revisión identificó 49 códigos de estrato en 2014, tres códigos que se repiten entre departamentos durante 2015–2017, y más de 200 códigos en cada año del período 2018–2025. Para 2015–2017 se examinó como alternativa la combinación departamento–estrato, que produjo 73 combinaciones observadas por año. Esta especificación es coherente internamente, pero debe contrastarse con los metadatos oficiales de cada levantamiento.</p>
+<p>En las bases integradas de 2021–2025 se identificaron 17 estratos con un solo conglomerado por año. Al comparar los tratamientos <code>adjust</code> y <code>average</code>, el error estándar de 2025 pasó de 1,518 a 1,612 puntos porcentuales, sin modificar su porcentaje estimado (29,966 %). Esta diferencia indica que las estimaciones puntuales son estables respecto al tratamiento ensayado, pero la incertidumbre depende del procedimiento elegido. Los intervalos no deben interpretarse como inferencia definitiva del diseño.</p>
+</section>
+<section id="efectos-parciales-del-modelo-gam" class="level2">
+<h2 class="anchored" data-anchor-id="efectos-parciales-del-modelo-gam">12. Efectos parciales del modelo GAM</h2>
+<p>El GAM ampliado estimó funciones suaves para el año y la edad, manteniendo en el modelo las demás covariables. En las Figuras 2 y 3 se representa el efecto parcial sobre la escala logit; por tanto, las ordenadas no son porcentajes ni probabilidades directas de ausencia de compra.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-gam-anio" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gam-anio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="informe_ENDES_files/figure-html/fig-gam-anio-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gam-anio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;2: Figura 2. Efecto parcial estimado del año en el GAM de quince predictoras.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Efecto del año.</strong> La función disminuye hasta alrededor de 2020 y aumenta después, describiendo una trayectoria aproximadamente en U. Esta forma es compatible con la serie descriptiva, pero representa una asociación condicional del modelo y no sustituye las proporciones ponderadas observadas.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-gam-edad" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gam-edad-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="informe_ENDES_files/figure-html/fig-gam-edad-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gam-edad-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;3: Figura 3. Efecto parcial estimado de la edad en el GAM de quince predictoras.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Efecto de la edad.</strong> El efecto parcial disminuye a medida que aumenta la edad, lo que expresa menores log-odds modelados de reportar no compra a edades mayores, manteniendo los restantes términos. No constituye evidencia causal y requiere cautela en edades con escasas observaciones.</p>
+</section>
+<section id="validación-temporal-y-calibración" class="level2">
+<h2 class="anchored" data-anchor-id="validación-temporal-y-calibración">13. Validación temporal y calibración</h2>
+<p>Al entrenar con 2014–2022 y evaluar 2023–2025, el GAM ampliado mejoró las métricas promedio, aunque sus predicciones agregadas quedaron por debajo de las proporciones observadas, sobre todo en 2025. La diferencia entre buen desempeño probabilístico promedio y calibración anual imperfecta constituye una limitación relevante.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-calibracion-temporal" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-calibracion-temporal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="informe_ENDES_files/figure-html/fig-calibracion-temporal-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-calibracion-temporal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;4: Porcentaje observado y predicciones ponderadas de los GAM en 2023–2025.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Cuadro 5. Proporciones observadas y predichas en la validación temporal</caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;" data-quarto-table-cell-role="th">Año</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Observado</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">GAM básico</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">GAM ampliado</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">2023</td>
+<td style="text-align: right;">28,13 %</td>
+<td style="text-align: right;">27,94 %</td>
+<td style="text-align: right;">27,28 %</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2024</td>
+<td style="text-align: right;">28,92 %</td>
+<td style="text-align: right;">27,62 %</td>
+<td style="text-align: right;">26,39 %</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2025</td>
+<td style="text-align: right;">29,97 %</td>
+<td style="text-align: right;">26,71 %</td>
+<td style="text-align: right;">24,69 %</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="contrastes-exploratorios-entre-años" class="level2">
+<h2 class="anchored" data-anchor-id="contrastes-exploratorios-entre-años">14. Contrastes exploratorios entre años</h2>
+</section>
+<section id="contrastes-exploratorios-entre-años-1" class="level2">
+<h2 class="anchored" data-anchor-id="contrastes-exploratorios-entre-años-1">14. Contrastes exploratorios entre años</h2>
+<p>Se efectuaron cuatro comparaciones de Wald con ajuste de Holm por multiplicidad. Bajo independencia provisional entre estimadores anuales, resultaron significativas las diferencias 2014–2020 y 2020–2025. Sin embargo, la repetición de códigos de conglomerado entre algunos años impide dar por demostrada esa independencia.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Cuadro 6. Contrastes de Wald exploratorios, método adjust</caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;" data-quarto-table-cell-role="th">Comparación</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Diferencia (pp)</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">p de Holm</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Sensibilidad temporal</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">2014-2020</td>
+<td style="text-align: right;">-9.40</td>
+<td style="text-align: center;">&lt; 0,001</td>
+<td style="text-align: left;">Estable en escenarios</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2020-2025</td>
+<td style="text-align: right;">+4.96</td>
+<td style="text-align: center;">0,0304</td>
+<td style="text-align: left;">Depende del escenario</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2014-2025</td>
+<td style="text-align: right;">-4.44</td>
+<td style="text-align: center;">0,0575</td>
+<td style="text-align: left;">Depende del escenario</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2023-2025</td>
+<td style="text-align: right;">+1.84</td>
+<td style="text-align: center;">0,3578</td>
+<td style="text-align: left;">No significativo en escenarios</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Los escenarios de dependencia temporal utilizaron correlaciones hipotéticas (<span class="math inline">\(\rho \in \{-0{,}3;\ 0;\ 0{,}3;\ 0{,}6\}\)</span>). La disminución 2014–2020 mantuvo el criterio de significación en todos los escenarios explorados, mientras que las comparaciones 2020–2025 y 2014–2025 cambiaron de decisión según el valor supuesto. Estos escenarios no estiman la covarianza real del diseño ENDES.</p>
+</section>
+<section id="discusión-y-limitaciones" class="level2">
+<h2 class="anchored" data-anchor-id="discusión-y-limitaciones">15. Discusión y limitaciones</h2>
+<p>Los resultados muestran que el GAM con quince predictoras constituye una herramienta útil para estudiar asociaciones no lineales en la ausencia reportada de compra de medicamentos antihipertensivos. La mejora en log-loss y Brier Score frente al modelo básico respalda su mayor utilidad predictiva relativa, aunque el comportamiento observado entre 2023 y 2025 revela una calibración anual insuficiente para sostener que reproduce adecuadamente todos los cambios recientes. La trayectoria de año y el gradiente de edad son efectos parciales condicionados a las demás variables; no identifican causalidad.</p>
+<p>El estudio tiene limitaciones importantes. Primero, se analiza la compra reportada, que no equivale a consumo, recepción gratuita ni adherencia al tratamiento. Segundo, la población está restringida a personas con diagnóstico previo reportado de hipertensión y respuestas válidas, no a todas las personas hipertensas del país. Tercero, la recodificación <em>No informado</em> conserva registros sin eliminar el posible sesgo asociado a faltantes. Cuarto, aunque se conservaron pesos, estratos y conglomerados, el GAM no aplicó una inferencia integral ajustada al diseño complejo y las bandas gráficas convencionales no representan automáticamente intervalos nacionales. Quinto, los contrastes temporales utilizaron supuestos y escenarios de dependencia cuya verificación completa requiere documentación muestral adicional.</p>
+</section>
+<section id="conclusiones" class="level2">
+<h2 class="anchored" data-anchor-id="conclusiones">16. Conclusiones</h2>
+<ol type="1">
+<li>Se consolidó una base reproducible de 32 806 registros de ENDES 2014–2025 y se construyó una respuesta binaria de ausencia reportada de compra en personas con diagnóstico previo de hipertensión.</li>
+<li>El GAM de quince predictoras mejoró el log-loss y el Brier Score frente al GAM básico en la validación temporal 2023–2025; esto demuestra utilidad predictiva relativa, no superioridad universal.</li>
+<li>Se describió una disminución ponderada de 34,41 % (2014) a 25,01 % (2020) y un incremento posterior hasta 29,97 % (2025). La curva parcial del año presentó una forma aproximada en U.</li>
+<li>La edad mostró una asociación parcial descendente con los log-odds de reportar no compra. Estas asociaciones no deben interpretarse como relaciones causales.</li>
+<li>La calibración insuficiente en 2023–2025 y las limitaciones del diseño muestral justifican presentar el estudio como análisis exploratorio y predictivo, con inferencia temporal sujeta a supuestos explícitos.</li>
+</ol>
+</section>
+<section id="reproducibilidad-y-sustentación" class="level2">
+<h2 class="anchored" data-anchor-id="reproducibilidad-y-sustentación">17. Reproducibilidad y sustentación</h2>
+<p>Los resultados pueden revisarse mediante los scripts y archivos conservados en <code>datos/integrados</code>, <code>datos/procesados</code>, <code>scripts</code>, <code>resultados/modelos</code> y <code>resultados/graficos</code>. Para la sustentación se recomienda explicar primero la selección de la cohorte y la definición literal de QS104; después, justificar las quince predictoras, interpretar las curvas del GAM y cerrar mostrando tanto las mejoras predictivas como sus limitaciones.</p>
+</section>
+<section id="referencias-esenciales" class="level2">
+<h2 class="anchored" data-anchor-id="referencias-esenciales">18. Referencias esenciales</h2>
+<p>Hastie, T., y Tibshirani, R. (1986). Generalized additive models. <em>Statistical Science, 1</em>(3), 297–310. https://doi.org/10.1214/ss/1177013604.</p>
+<p>Instituto Nacional de Estadística e Informática. (s. f.). <em>Sistema de consulta de microdatos de encuestas</em>. https://proyectos.inei.gob.pe/microdatos/Consulta_por_Encuesta.asp.</p>
+<p>Lumley, T. (2010). <em>Complex surveys: A guide to analysis using R</em>. Wiley.</p>
+<p>Wood, S. N. (2017). <em>Generalized additive models: An introduction with R</em> (2.ª ed.). Chapman and Hall/CRC.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

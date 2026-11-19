@@ -1,0 +1,58 @@
+# Microdatos originales y procesados de ENDES
+datos/originales/
+datos/procesados/
+datos/integrados/
+
+# Modelos ajustados y resultados internos
+resultados/modelos/
+
+# Archivos temporales de R
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+
+# Archivos temporales de Quarto
+.quarto/
+*_cache/
+*_files/
+
+# Archivos temporales del sistema
+Thumbs.db
+.DS_Store
+respaldo_scripts/
+
+/.quarto/
+**/*.quarto_ipynb
+
+# Datos individuales ENDES
+datos/originales/
+datos/extraidos/
+datos/integrados/
+datos/procesados/
+
+# Modelos y resultados internos
+resultados/modelos/
+
+# Respaldos y archivos temporales
+respaldo_scripts/
+respaldo_pruebas/
+.quarto/
+.Rproj.user/
+.Rhistory
+.RData
+*.rds
+*.RData
+*.zip
+
+# Conservamos datos/publicos/ para reproducir el informe
+
+# Recursos del informe anterior
+Proyecto_ENDES_GAM_Quarto_files/
+
+# Archivos auxiliares de Quarto
+.quarto/
+
+# Archivos temporales de R Markdown
+*.knit.md
+*.utf8.md

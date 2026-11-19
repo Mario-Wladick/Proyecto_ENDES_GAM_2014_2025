@@ -1,0 +1,17 @@
+html, body {background:#fff !important; color:#000 !important; font-family: "Times New Roman", Times, serif !important; font-size:12pt !important; line-height:1.18 !important;}
+body {max-width: 780px; margin: 0 auto !important; padding: 24px 46px !important;}
+h1.title {text-align:center; text-transform:uppercase; font-size: 14pt; line-height:1.15; margin: 0 0 12px 0;}
+h1,h2 {font-size:12pt !important; font-weight:bold !important; color:#000 !important; margin:14px 0 5px !important;}
+p {text-align:justify; margin:0 0 7px 0; text-indent: 1em;}
+p:has(img), .quarto-figure, figcaption {text-indent:0; text-align:center;}
+header#title-block-header {text-align:center; margin: 10px 0 18px;}
+#title-block-header p {text-align:center; text-indent:0;}
+#title-block-header .subtitle {font-size:12pt;}
+table {font-size:10.5pt; border-collapse:collapse; margin:10px auto 14px; width:auto; max-width:100%;}
+table th,table td {padding:3px 8px; border:none; color:#000 !important; background:#fff !important;}
+table thead {border-top:1px solid #111;border-bottom:1px solid #111;}
+table tbody {border-bottom:1px solid #111;}
+caption, figcaption {font-family:"Times New Roman",Times,serif; font-size:10.5pt; color:#000; text-align:center;}
+img {max-width:88%; height:auto; filter:grayscale(100%);}
+hr {border:0; border-top:1px solid #000;}
+a {color:#000; text-decoration:underline;}

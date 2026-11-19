@@ -1,0 +1,652 @@
+---
+title: "ANÁLISIS DE LA AUSENCIA REPORTADA DE COMPRA DE MEDICAMENTOS ANTIHIPERTENSIVOS EN EL PERÚ, 2014–2025, MEDIANTE MODELOS ADITIVOS GENERALIZADOS (GAM)"
+author:
+  - "Mario Wilfredo Ramírez Puma"
+  - "Fiorella Yaneth Paredes Coaguila"
+  - "Paolo Fontanil Barrera"
+  - "Jefry Quispe Ramos"
+subtitle: "Universidad Nacional del Altiplano – Escuela Profesional de Ingeniería Estadística e Informática · Ciencia de Datos · 2026 · Docente: Ing. Fred Torres Cruz"
+lang: es
+format:
+  html: default
+  pdf: default
+---
+
+## 1. Resumen ejecutivo
+
+Se analizaron microdatos de la Encuesta Demográfica y de Salud Familiar (ENDES) correspondientes a 2014–2025 para estudiar la ausencia reportada de compra de medicamentos para controlar la presión alta. La población analítica incluyó personas de 15 años o más con diagnóstico previo reportado de hipertensión, respuesta válida sobre compra y peso muestral positivo. Tras integrar y depurar los módulos anuales se obtuvieron **32 806 registros**. En R se ajustó un modelo aditivo generalizado (GAM) con **15 predictoras**, frente a un GAM básico de año, edad y sexo. En validación temporal, el GAM ampliado mejoró el log-loss (0,5264 frente a 0,5397) y el Brier Score (0,1743 frente a 0,1799), aunque subestimó las proporciones observadas durante 2023–2025. La proporción ponderada descendió de 34,41 % en 2014 a 25,01 % en 2020 y alcanzó 29,97 % en 2025. El trabajo es descriptivo y predictivo, sin interpretación causal ni demostración de adherencia farmacológica.
+
+## 2. Contexto y pregunta de investigación
+
+La hipertensión arterial constituye un problema relevante para la salud pública. La ENDES ofrece información periódica sobre diagnóstico y compra de medicamentos, pero las preguntas del cuestionario deben interpretarse literalmente. En este trabajo, la pregunta QS104 registra si los participantes compraron medicamentos para controlar su presión alta; responder que no compraron no demuestra falta de tratamiento, falta de adherencia ni ausencia de medicamentos obtenidos por otras vías.
+
+La pregunta de investigación es: **¿cómo se relacionan el año de encuesta y las características demográficas, sanitarias, educativas, territoriales y de hábitos con la probabilidad de reportar ausencia de compra de medicamentos para controlar la presión alta entre 2014 y 2025?** Los doce levantamientos de ENDES constituyen cortes transversales sucesivos: no representan necesariamente seguimiento longitudinal de las mismas personas.
+
+## 3. Problema y objetivos
+
+**Problema.** La proporción de personas diagnosticadas con hipertensión que reportan no comprar medicamentos puede variar entre años y subgrupos. Las bases históricas difieren en nombres de variables, cuestionarios y patrones de respuesta, lo que exige armonización antes del modelado.
+
+**Objetivo general.** Analizar la evolución de la ausencia reportada de compra de medicamentos antihipertensivos en el Perú durante 2014–2025 mediante un GAM con quince variables predictoras.
+
+**Objetivos específicos.** Consolidar y validar los módulos ENDES; definir una respuesta binaria; describir porcentajes ponderados anuales; ajustar y comparar un GAM básico y otro ampliado; examinar los efectos parciales del año y la edad; y evaluar la capacidad predictiva y las limitaciones del diseño muestral.
+
+## 4. Construcción y calidad de la muestra analítica
+
+Se utilizaron los módulos CSALUD01 y, cuando correspondió, información de RECH0 para recuperar variables del diseño y del hogar. La selección exigió diagnóstico de presión alta reportado (QS102=1), respuesta sobre compra de medicamentos (QS104=1 o 2), edad de al menos 15 años, sexo válido y ponderación positiva. Se construyó `sin_medicacion = 1` para QS104=2 (no compró) y `sin_medicacion = 0` para QS104=1 (sí compró). El nombre técnico de la variable se conserva por reproducibilidad, pero su interpretación es *no compra reportada*.
+
+| Etapa de procesamiento                          |  Registros |
+|:------------------------------------------------|-----------:|
+| Registros iniciales en los módulos consolidados |    406 319 |
+| Diagnóstico previo reportado (QS102=1)          |     33 089 |
+| Respuesta válida en QS104                       |     33 061 |
+| Edad, sexo y peso muestral válidos              | **32 806** |
+
+: Cuadro 1. Flujo de selección y tamaño de la muestra.
+
+**Composición anual.** Cada año aportó entre 2 435 y 3 042 registros analíticos. La diferencia entre 406 319 observaciones iniciales y 32 806 registros finales obedece, principalmente, a la delimitación de personas con diagnóstico previo de hipertensión; no implica que el resto de los participantes tenga información errónea.
+
+## 5. Variables incluidas en el GAM
+
+El modelo ampliado utiliza exactamente quince predictoras, seleccionadas de los módulos de salud y hogares. El año y la edad se representaron mediante funciones suaves; las demás variables se incorporaron como factores o términos según su naturaleza. El resultado binario no se incluyó entre las predictoras, para evitar fuga de información.
+
+| N.º | Predictora                   | N.º | Predictora                  |
+|----:|:-----------------------------|----:|:----------------------------|
+|   1 | Año de encuesta              |   9 | Nivel educativo             |
+|   2 | Edad                         |  10 | Departamento o región       |
+|   3 | Sexo                         |  11 | Área de residencia          |
+|   4 | Diabetes reportada           |  12 | Miembros del hogar          |
+|   5 | Consumo de tabaco, 12 meses  |  13 | Altitud                     |
+|   6 | Consumo de alcohol, 12 meses |  14 | Grupo de consumo de frutas  |
+|   7 | Asistencia escolar           |  15 | Días de consumo de verduras |
+|   8 | Tenencia de seguro de salud  |     |                             |
+
+: Cuadro 2. Quince variables predictoras del modelo ampliado.
+
+En algunas variables categóricas se creó la categoría *No informado* para conservar las observaciones, debido a faltantes desiguales por año y sexo. Esta recodificación no recupera la información ausente y puede afectar las asociaciones estimadas; por ello se examinó mediante análisis de sensibilidad. Se evitó incluir simultáneamente dos variables redundantes de consumo de alcohol: la especificación final alcanzó rango **78 de 78** parámetros estimables.
+
+## 6. Recolección, programación y procesamiento
+
+Los microdatos secundarios se descargaron de las fuentes oficiales del Instituto Nacional de Estadística e Informática (INEI). Python se utilizó en etapas de lectura, integración y control histórico; el análisis ampliado, las validaciones y las figuras que se presentan aquí se realizaron en R. Se conservaron los archivos originales, las bases integradas y los scripts numerados, facilitando reconstruir cada transformación.
+
+El flujo comprendió: descarga por año, revisión de códigos, depuración de observaciones, integración de módulos, selección de cohortes, armonización de quince predictoras, ajustes GAM, evaluación temporal y auditoría del diseño complejo de ENDES. Se comprobaron identificadores de conglomerado (`QHCLUSTER`), estrato (`HV022`) y factores de ponderación.
+
+## 7. Métodos estadísticos aplicados
+
+**Análisis descriptivo ponderado.** Para cada año se estimó la proporción de ausencia reportada de compra, considerando pesos y variables del diseño disponibles. Se utilizó el paquete `survey` de R para errores estándar e intervalos aproximados. El tratamiento de estratos con un solo conglomerado se examinó mediante las alternativas `adjust` y `average`.
+
+**Modelado.** Se ajustaron modelos aditivos generalizados con enlace logit y respuesta binaria. El GAM básico incluyó funciones suaves de año y edad y el factor sexo. El modelo ampliado incorporó doce predictores adicionales:
+
+$$
+\operatorname{logit}\{P(Y_i=1\mid X_i)\}
+= \beta_0+s_1(\text{año}_i)+s_2(\text{edad}_i)+\sum_{j=3}^{15}f_j(X_{ij}).
+$$
+
+Las funciones $f_j$ representan términos paramétricos o suaves: el número quince corresponde a variables predictoras, no a quince funciones de suavizado. En particular, miembros del hogar y altitud se incluyeron con funciones suaves. Los ajustes finales emplearon `mgcv` y familia `quasibinomial(link="logit")` para trabajar con ponderaciones no enteras, sin interpretar este procedimiento como una solución completa al diseño complejo.
+
+**Evaluación predictiva.** Primero se realizó una partición aleatoria estratificada por año y respuesta (80 % para entrenamiento, 20 % para prueba). Después se utilizó una validación más exigente: entrenamiento en 2014–2022 y evaluación fuera del período de entrenamiento en 2023–2025. Se compararon log-loss y Brier Score, métricas que penalizan las predicciones probabilísticas incorrectas; en ambas, un valor menor es mejor.
+
+**Inferencia comparativa.** Se calcularon diferencias entre proporciones anuales mediante contrastes de Wald aproximados y corrección de Holm para cuatro comparaciones. El procedimiento inicial supuso independencia entre estimadores de años distintos. Dado que ENDES incorpora rotación de conglomerados, se exploraron correlaciones hipotéticas de −0,3; 0; 0,3 y 0,6 para evaluar la sensibilidad, sin considerarlas estimaciones de covarianza del diseño.
+
+## 8. Resultados de comparación de modelos
+
+El GAM ampliado obtuvo menores pérdidas predictivas en la evaluación temporal, lo que indica mejor desempeño probabilístico promedio en 2023–2025 frente al GAM básico. Sin embargo, una mejora promedio no asegura calibración adecuada en cada año ni capacidad predictiva para períodos posteriores.
+
+```{r}
+#| label: cuadro-3-modelos
+#| echo: false
+#| warning: false
+#| message: false
+
+modelos <- read.csv(
+  "datos/publicos/28_comparacion_temporal.csv"
+)
+
+stopifnot(
+  all(c("X", "logloss", "brier") %in% names(modelos)),
+  nrow(modelos) == 2
+)
+
+modelos <- modelos[
+  match(
+    c("GAM_basico", "GAM_ampliado"),
+    modelos$X
+  ),
+]
+
+stopifnot(!anyNA(modelos$X))
+
+tabla3 <- data.frame(
+  Modelo = c("GAM básico", "GAM ampliado"),
+  Predictoras = c(3, 15),
+  `Log-loss` = formatC(
+    modelos$logloss,
+    format = "f",
+    digits = 4,
+    decimal.mark = ","
+  ),
+  `Brier Score` = formatC(
+    modelos$brier,
+    format = "f",
+    digits = 4,
+    decimal.mark = ","
+  ),
+  check.names = FALSE
+)
+
+knitr::kable(
+  tabla3,
+  format = "html",
+  align = c("l", "c", "r", "r"),
+  caption = paste(
+    "Cuadro 3. Evaluación temporal fuera",
+    "del entrenamiento, 2023–2025"
+  )
+)
+```
+
+| Modelo       | Predictoras |   Log-loss | Brier Score |
+|:-------------|------------:|-----------:|------------:|
+| GAM básico   |           3 |     0,5397 |      0,1799 |
+| GAM ampliado |          15 | **0,5264** |  **0,1743** |
+
+: Cuadro 3. Evaluación temporal fuera del período de entrenamiento, 2023–2025.
+
+En la partición aleatoria de prueba, el modelo de quince predictoras alcanzó un log-loss aproximado de 0,5086 y un Brier Score de 0,1682, frente a 0,5411 y 0,1803 del modelo básico. Las métricas temporales, más exigentes para evaluar cambios recientes, son las principales en esta interpretación.
+
+## 9. Evolución anual descriptiva ponderada
+
+```{r}
+#| label: fig-evolucion-endes
+#| fig-cap: "Figura 1. Proporción anual ponderada de ausencia reportada de compra, con intervalos aproximados del 95 % sujetos a los supuestos del diseño."
+#| fig-width: 8
+#| fig-height: 5
+#| echo: false
+#| warning: false
+#| message: false
+
+# Leer resultados reales de ENDES
+datos <- read.csv(
+  "datos/publicos/estimaciones_anuales.csv"
+)
+
+# Ordenar por año
+datos <- datos[order(datos$anio), ]
+
+# Verificar datos
+stopifnot(
+  nrow(datos) == 12,
+  identical(as.integer(datos$anio), 2014:2025)
+)
+
+# Preparar el grafico
+par(
+  mar = c(4.5, 4.5, 2.5, 1),
+  family = "serif"
+)
+
+# Graficar la proporcion anual
+plot(
+  datos$anio,
+  datos$porcentaje,
+  type = "n",
+  ylim = range(c(
+    datos$IC_inferior,
+    datos$IC_superior
+  )),
+  xlab = "Año",
+  ylab = "Porcentaje ponderado (%)",
+  main = "Ausencia reportada de compra de medicamentos",
+  xaxt = "n",
+  bty = "l"
+)
+
+axis(
+  1,
+  at = datos$anio,
+  labels = datos$anio,
+  las = 2,
+  cex.axis = 0.8
+)
+
+grid(
+  col = "gray90",
+  lty = 3
+)
+
+# Banda de intervalos de confianza
+polygon(
+  x = c(datos$anio, rev(datos$anio)),
+  y = c(
+    datos$IC_inferior,
+    rev(datos$IC_superior)
+  ),
+  col = "gray85",
+  border = NA
+)
+
+# Linea de evolucion anual
+lines(
+  datos$anio,
+  datos$porcentaje,
+  type = "o",
+  col = "black",
+  lwd = 2,
+  pch = 16,
+  cex = 0.6
+)
+```
+
+**Interpretación.** El comportamiento no es estrictamente lineal: existen incrementos en 2017 y 2021 y fluctuaciones entre 2022 y 2025. Por ese motivo, las funciones suaves de un GAM resultan útiles para explorar cambios temporales no monótonos. El año 2020 coincide con un contexto excepcional, pero este estudio no permite atribuirle causalmente la disminución observada.
+
+## 10. Estimaciones anuales e incertidumbre muestral
+
+El Cuadro 4 resume los registros por año y las estimaciones obtenidas con `survey`.
+
+```{r}
+#| label: cuadro-4-endes
+#| echo: false
+#| warning: false
+#| message: false
+
+# Leer resultados agregados
+endes <- read.csv(
+  "datos/publicos/estimaciones_anuales.csv"
+)
+
+# Comprobar los doce años
+stopifnot(
+  nrow(endes) == 12,
+  all(2014:2025 %in% endes$anio)
+)
+
+# Preparar tabla
+tabla <- data.frame(
+  Año = endes$anio,
+  N = format(
+    endes$registros_cohorte,
+    big.mark = " ",
+    scientific = FALSE,
+    trim = TRUE
+  ),
+  `Porcentaje ponderado` = sprintf(
+    "%.2f %%",
+    endes$porcentaje
+  ),
+  `IC aproximado 95 %` = sprintf(
+    "[%.2f; %.2f]",
+    endes$IC_inferior,
+    endes$IC_superior
+  ),
+  check.names = FALSE
+)
+
+# Presentar el cuadro
+knitr::kable(
+  tabla,
+  format = "html",
+  align = c("c", "r", "r", "c"),
+  caption = paste(
+    "Cuadro 4. Evolución de la ausencia",
+    "reportada de compra, ENDES 2014–2025"
+  )
+)
+```
+
+## 11. Identificación del diseño y sensibilidad
+
+La revisión identificó 49 códigos de estrato en 2014, tres códigos que se repiten entre departamentos durante 2015–2017, y más de 200 códigos en cada año del período 2018–2025. Para 2015–2017 se examinó como alternativa la combinación departamento–estrato, que produjo 73 combinaciones observadas por año. Esta especificación es coherente internamente, pero debe contrastarse con los metadatos oficiales de cada levantamiento.
+
+En las bases integradas de 2021–2025 se identificaron 17 estratos con un solo conglomerado por año. Al comparar los tratamientos `adjust` y `average`, el error estándar de 2025 pasó de 1,518 a 1,612 puntos porcentuales, sin modificar su porcentaje estimado (29,966 %). Esta diferencia indica que las estimaciones puntuales son estables respecto al tratamiento ensayado, pero la incertidumbre depende del procedimiento elegido. Los intervalos no deben interpretarse como inferencia definitiva del diseño.
+
+## 12. Efectos parciales del modelo GAM
+
+El GAM ampliado estimó funciones suaves para el año y la edad, manteniendo en el modelo las demás covariables. En las Figuras 2 y 3 se representa el efecto parcial sobre la escala logit; por tanto, las ordenadas no son porcentajes ni probabilidades directas de ausencia de compra.
+
+```{r}
+#| label: fig-gam-anio
+#| fig-cap: "Figura 2. Efecto parcial estimado del año en el GAM de quince predictoras."
+#| fig-width: 8
+#| fig-height: 4.5
+#| echo: false
+#| warning: false
+
+curva_anio <- read.csv(
+ "datos/publicos/27_efecto_anio.csv"
+)
+
+curva_anio <- curva_anio[
+  order(curva_anio$valor),
+]
+
+stopifnot(
+  all(c(
+    "valor", "efecto", "inferior", "superior"
+  ) %in% names(curva_anio))
+)
+
+plot(
+  curva_anio$valor,
+  curva_anio$efecto,
+  type = "n",
+  ylim = range(
+    curva_anio$inferior,
+    curva_anio$superior
+  ),
+  xlab = "Año",
+  ylab = "Efecto parcial (logit)",
+  main = "GAM: efecto parcial del año",
+  bty = "l"
+)
+
+polygon(
+  c(curva_anio$valor, rev(curva_anio$valor)),
+  c(curva_anio$inferior, rev(curva_anio$superior)),
+  col = "gray85",
+  border = NA
+)
+
+abline(h = 0, lty = 2, col = "gray50")
+
+lines(
+  curva_anio$valor,
+  curva_anio$efecto,
+  col = "black",
+  lwd = 2
+)
+```
+
+**Efecto del año.** La función disminuye hasta alrededor de 2020 y aumenta después, describiendo una trayectoria aproximadamente en U. Esta forma es compatible con la serie descriptiva, pero representa una asociación condicional del modelo y no sustituye las proporciones ponderadas observadas.
+
+```{r}
+#| label: fig-gam-edad
+#| fig-cap: "Figura 3. Efecto parcial estimado de la edad en el GAM de quince predictoras."
+#| fig-width: 8
+#| fig-height: 4.5
+#| echo: false
+#| warning: false
+
+curva_edad <- read.csv(
+  "datos/publicos/27_efecto_edad.csv"
+)
+
+curva_edad <- curva_edad[
+  order(curva_edad$valor),
+]
+
+stopifnot(
+  all(c(
+    "valor", "efecto", "inferior", "superior"
+  ) %in% names(curva_edad))
+)
+
+plot(
+  curva_edad$valor,
+  curva_edad$efecto,
+  type = "n",
+  ylim = range(
+    curva_edad$inferior,
+    curva_edad$superior
+  ),
+  xlab = "Edad (años)",
+  ylab = "Efecto parcial (logit)",
+  main = "GAM: efecto parcial de la edad",
+  bty = "l"
+)
+
+polygon(
+  c(curva_edad$valor, rev(curva_edad$valor)),
+  c(curva_edad$inferior, rev(curva_edad$superior)),
+  col = "gray85",
+  border = NA
+)
+
+abline(h = 0, lty = 2, col = "gray50")
+
+lines(
+  curva_edad$valor,
+  curva_edad$efecto,
+  col = "black",
+  lwd = 2
+)
+```
+
+**Efecto de la edad.** El efecto parcial disminuye a medida que aumenta la edad, lo que expresa menores log-odds modelados de reportar no compra a edades mayores, manteniendo los restantes términos. No constituye evidencia causal y requiere cautela en edades con escasas observaciones.
+
+## 13. Validación temporal y calibración
+
+Al entrenar con 2014–2022 y evaluar 2023–2025, el GAM ampliado mejoró las métricas promedio, aunque sus predicciones agregadas quedaron por debajo de las proporciones observadas, sobre todo en 2025. La diferencia entre buen desempeño probabilístico promedio y calibración anual imperfecta constituye una limitación relevante.
+
+```{r}
+#| label: fig-calibracion-temporal
+#| fig-cap: "Porcentaje observado y predicciones ponderadas de los GAM en 2023–2025."
+#| fig-width: 8
+#| fig-height: 4.5
+#| echo: false
+#| warning: false
+#| message: false
+
+# Leer los resultados reales
+calibracion <- read.csv(
+  "datos/publicos/29_calibracion_temporal.csv"
+)
+
+calibracion <- calibracion[
+  order(calibracion$anio),
+]
+
+stopifnot(
+  identical(as.integer(calibracion$anio), 2023:2025)
+)
+
+# Configurar el gráfico
+par(
+  mar = c(4.5, 4.5, 2, 1),
+  family = "serif"
+)
+
+# Generar la Figura 4
+matplot(
+  calibracion$anio,
+  calibracion[, c(
+    "observado_pct",
+    "basico_pct",
+    "ampliado_pct"
+  )],
+  type = "b",
+  lty = c(1, 2, 3),
+  pch = c(16, 17, 15),
+  col = c("black", "gray40", "gray65"),
+  lwd = 2,
+  xaxt = "n",
+  xlab = "Año",
+  ylab = "Porcentaje (%)",
+  ylim = range(
+    calibracion[, c(
+      "observado_pct",
+      "basico_pct",
+      "ampliado_pct"
+    )]
+  ),
+  main = "ENDES: observado y predicho",
+  bty = "l"
+)
+
+axis(1, at = 2023:2025)
+
+grid(col = "gray90", lty = 3)
+
+legend(
+  "bottomleft",
+  legend = c(
+    "Observado",
+    "GAM básico",
+    "GAM ampliado"
+  ),
+  col = c("black", "gray40", "gray65"),
+  lty = c(1, 2, 3),
+  pch = c(16, 17, 15),
+  lwd = 2,
+  bty = "n",
+  cex = 0.85
+)
+```
+
+```{r}
+#| label: cuadro-5-calibracion
+#| echo: false
+#| warning: false
+#| message: false
+
+# Ordenar los resultados por año
+calibracion <- calibracion[
+  order(calibracion$anio),
+]
+
+# Formato de porcentajes
+formato_pct <- function(x) {
+  paste0(
+    formatC(
+      x,
+      format = "f",
+      digits = 2,
+      decimal.mark = ","
+    ),
+    " %"
+  )
+}
+
+# Construir el Cuadro 5
+tabla5 <- data.frame(
+  Año = calibracion$anio,
+  Observado = formato_pct(
+    calibracion$observado_pct
+  ),
+  `GAM básico` = formato_pct(
+    calibracion$basico_pct
+  ),
+  `GAM ampliado` = formato_pct(
+    calibracion$ampliado_pct
+  ),
+  check.names = FALSE
+)
+
+# Mostrar el cuadro en HTML
+knitr::kable(
+  tabla5,
+  format = "html",
+  align = c("c", "r", "r", "r"),
+  caption = paste(
+    "Cuadro 5. Proporciones observadas",
+    "y predichas en la validación temporal"
+  )
+)
+```
+
+## 14. Contrastes exploratorios entre años
+
+## 14. Contrastes exploratorios entre años
+
+Se efectuaron cuatro comparaciones de Wald con ajuste de Holm por multiplicidad. Bajo independencia provisional entre estimadores anuales, resultaron significativas las diferencias 2014–2020 y 2020–2025. Sin embargo, la repetición de códigos de conglomerado entre algunos años impide dar por demostrada esa independencia.
+
+```{r}
+#| label: cuadro-6-contrastes
+#| echo: false
+#| warning: false
+#| message: false
+
+contrastes <- read.csv(
+  "datos/publicos/contrastes_exploratorios.csv"
+)
+
+# Verificar que estén los cuatro contrastes
+stopifnot(nrow(contrastes) == 4)
+
+# Ordenar las comparaciones
+orden <- c(
+  "2014-2020",
+  "2020-2025",
+  "2014-2025",
+  "2023-2025"
+)
+
+contrastes$comparacion <- paste(
+  contrastes$anio_inicial,
+  contrastes$anio_final,
+  sep = "-"
+)
+
+contrastes <- contrastes[
+  match(orden, contrastes$comparacion),
+]
+
+stopifnot(!anyNA(contrastes$comparacion))
+
+# Sensibilidad reportada en el informe
+sensibilidad <- c(
+  "Estable en escenarios",
+  "Depende del escenario",
+  "Depende del escenario",
+  "No significativo en escenarios"
+)
+
+tabla6 <- data.frame(
+  Comparación = contrastes$comparacion,
+  `Diferencia (pp)` = sprintf(
+    "%+.2f",
+    contrastes$diferencia_pp
+  ),
+  `p de Holm` = ifelse(
+    contrastes$p_holm < 0.001,
+    "< 0,001",
+    formatC(
+      contrastes$p_holm,
+      format = "f",
+      digits = 4,
+      decimal.mark = ","
+    )
+  ),
+  `Sensibilidad temporal` = sensibilidad,
+  check.names = FALSE
+)
+
+knitr::kable(
+  tabla6,
+  format = "html",
+  align = c("c", "r", "c", "l"),
+  escape = TRUE,
+  caption = paste(
+    "Cuadro 6. Contrastes de Wald",
+    "exploratorios, método adjust"
+  )
+)
+```
+
+Los escenarios de dependencia temporal utilizaron correlaciones hipotéticas ($\rho \in \{-0{,}3;\ 0;\ 0{,}3;\ 0{,}6\}$). La disminución 2014–2020 mantuvo el criterio de significación en todos los escenarios explorados, mientras que las comparaciones 2020–2025 y 2014–2025 cambiaron de decisión según el valor supuesto. Estos escenarios no estiman la covarianza real del diseño ENDES.
+
+## 15. Discusión y limitaciones
+
+Los resultados muestran que el GAM con quince predictoras constituye una herramienta útil para estudiar asociaciones no lineales en la ausencia reportada de compra de medicamentos antihipertensivos. La mejora en log-loss y Brier Score frente al modelo básico respalda su mayor utilidad predictiva relativa, aunque el comportamiento observado entre 2023 y 2025 revela una calibración anual insuficiente para sostener que reproduce adecuadamente todos los cambios recientes. La trayectoria de año y el gradiente de edad son efectos parciales condicionados a las demás variables; no identifican causalidad.
+
+El estudio tiene limitaciones importantes. Primero, se analiza la compra reportada, que no equivale a consumo, recepción gratuita ni adherencia al tratamiento. Segundo, la población está restringida a personas con diagnóstico previo reportado de hipertensión y respuestas válidas, no a todas las personas hipertensas del país. Tercero, la recodificación *No informado* conserva registros sin eliminar el posible sesgo asociado a faltantes. Cuarto, aunque se conservaron pesos, estratos y conglomerados, el GAM no aplicó una inferencia integral ajustada al diseño complejo y las bandas gráficas convencionales no representan automáticamente intervalos nacionales. Quinto, los contrastes temporales utilizaron supuestos y escenarios de dependencia cuya verificación completa requiere documentación muestral adicional.
+
+## 16. Conclusiones
+
+1.  Se consolidó una base reproducible de 32 806 registros de ENDES 2014–2025 y se construyó una respuesta binaria de ausencia reportada de compra en personas con diagnóstico previo de hipertensión.
+2.  El GAM de quince predictoras mejoró el log-loss y el Brier Score frente al GAM básico en la validación temporal 2023–2025; esto demuestra utilidad predictiva relativa, no superioridad universal.
+3.  Se describió una disminución ponderada de 34,41 % (2014) a 25,01 % (2020) y un incremento posterior hasta 29,97 % (2025). La curva parcial del año presentó una forma aproximada en U.
+4.  La edad mostró una asociación parcial descendente con los log-odds de reportar no compra. Estas asociaciones no deben interpretarse como relaciones causales.
+5.  La calibración insuficiente en 2023–2025 y las limitaciones del diseño muestral justifican presentar el estudio como análisis exploratorio y predictivo, con inferencia temporal sujeta a supuestos explícitos.
+
+## 17. Reproducibilidad y sustentación
+
+Los resultados pueden revisarse mediante los scripts y archivos conservados en `datos/integrados`, `datos/procesados`, `scripts`, `resultados/modelos` y `resultados/graficos`. Para la sustentación se recomienda explicar primero la selección de la cohorte y la definición literal de QS104; después, justificar las quince predictoras, interpretar las curvas del GAM y cerrar mostrando tanto las mejoras predictivas como sus limitaciones.
+
+## 18. Referencias esenciales
+
+Hastie, T., y Tibshirani, R. (1986). Generalized additive models. *Statistical Science, 1*(3), 297–310. https://doi.org/10.1214/ss/1177013604.
+
+Instituto Nacional de Estadística e Informática. (s. f.). *Sistema de consulta de microdatos de encuestas*. https://proyectos.inei.gob.pe/microdatos/Consulta_por_Encuesta.asp.
+
+Lumley, T. (2010). *Complex surveys: A guide to analysis using R*. Wiley.
+
+Wood, S. N. (2017). *Generalized additive models: An introduction with R* (2.ª ed.). Chapman and Hall/CRC.
