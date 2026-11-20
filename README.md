@@ -92,3 +92,46 @@ https://doi.org/10.5281/zenodo.24383832
 https://doi.org/10.5281/zenodo.24383831
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24383832.svg)](https://doi.org/10.5281/zenodo.24383832)
+
+## Prueba de reproducibilidad desde GitHub
+
+Se verifico la reproduccion del informe ENDES 2014-2025
+desde una copia limpia del repositorio.
+
+### Requisitos
+
+- R 4.5.1
+- Quarto 1.8.25
+- Paquetes de R utilizados por el informe
+
+### Procedimiento
+
+Clonar el repositorio:
+
+```bash
+git clone https://github.com/Mario-Wladick/Proyecto_ENDES_GAM_2014_2025.git
+cd Proyecto_ENDES_GAM_2014_2025
+```
+
+Ejecutar el pipeline publico:
+
+```bash
+Rscript -e 'source("pipeline_publicacion.R")'
+```
+
+### Resultado de la prueba
+
+Fecha: 20 de noviembre de 2026.
+
+- Repositorio clonado correctamente.
+- Estado inicial de Git limpio.
+- Siete archivos CSV requeridos encontrados y validados.
+- Informe Quarto generado correctamente.
+- Archivo de salida: informe_ENDES.html.
+
+La prueba confirma que el informe puede regenerarse
+desde los resultados estadisticos agregados publicados.
+
+No demuestra todavia la reconstruccion integral
+de los modelos GAM desde los microdatos originales ENDES.
+Esta validacion queda pendiente.
