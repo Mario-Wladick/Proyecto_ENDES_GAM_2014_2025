@@ -135,3 +135,20 @@ desde los resultados estadisticos agregados publicados.
 No demuestra todavia la reconstruccion integral
 de los modelos GAM desde los microdatos originales ENDES.
 Esta validacion queda pendiente.
+
+## Datos derivados publicados en Zenodo
+
+Los resultados estadisticos agregados de ENDES 2014-2025
+estan disponibles como un conjunto de datos independiente.
+
+DOI de los datos (version 1.0.0):
+https://doi.org/10.5281/zenodo.24405142
+
+DOI del software (version 1.0.0):
+https://doi.org/10.5281/zenodo.24383832
+
+Los datos incluyen nueve archivos CSV, un diccionario
+de 35 variables, un manifiesto y documentacion.
+
+El pipeline_publicacion.R reproduce el informe desde
+los CSV publicos incluidos en este repositorio.

@@ -643,6 +643,9 @@ Los resultados pueden revisarse mediante los scripts y archivos conservados en `
 **Disponibilidad del código y reproducibilidad.** El código fuente, el informe Quarto y los resultados estadísticos agregados de esta investigación se encuentran disponibles en GitHub: https://github.com/Mario-Wladick/Proyecto_ENDES_GAM_2014_2025.
 
 La versión 1.0.0 del proyecto se encuentra archivada permanentemente en Zenodo y puede consultarse mediante el DOI: https://doi.org/10.5281/zenodo.24383832.
+**Disponibilidad de los datos derivados.** Los nueve archivos CSV con resultados estadísticos agregados, el diccionario de 35 variables y la documentación correspondiente se encuentran publicados de manera independiente en Zenodo, versión 1.0.0, con DOI: https://doi.org/10.5281/zenodo.24405142.
+
+El código fuente y el informe Quarto están disponibles en GitHub. Se verificó la reproducción del informe desde una copia limpia del repositorio mediante la ejecución de `pipeline_publicacion.R`. Esta comprobación no implica que se haya validado la reconstrucción integral de los modelos desde los microdatos originales ENDES.
 
 El informe es reproducible a partir de los resultados agregados publicados. La reproducción integral desde los microdatos originales ENDES requiere obtener las bases oficiales del INEI y validar la ejecución completa del pipeline de procesamiento y modelado.
 
