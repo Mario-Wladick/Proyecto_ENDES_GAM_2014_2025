@@ -80,3 +80,15 @@ Escuela Profesional de Ingeniería Estadística
 e Informática.
 
 Curso: Ciencia de Datos, 2026.
+
+## Publicacion en Zenodo
+
+Este proyecto esta archivado en Zenodo.
+
+**DOI de la version v1.0.0:**
+https://doi.org/10.5281/zenodo.24383832
+
+**DOI general del proyecto:**
+https://doi.org/10.5281/zenodo.24383831
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24383832.svg)](https://doi.org/10.5281/zenodo.24383832)

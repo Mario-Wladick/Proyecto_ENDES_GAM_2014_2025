@@ -640,6 +640,11 @@ El estudio tiene limitaciones importantes. Primero, se analiza la compra reporta
 ## 17. Reproducibilidad y sustentación
 
 Los resultados pueden revisarse mediante los scripts y archivos conservados en `datos/integrados`, `datos/procesados`, `scripts`, `resultados/modelos` y `resultados/graficos`. Para la sustentación se recomienda explicar primero la selección de la cohorte y la definición literal de QS104; después, justificar las quince predictoras, interpretar las curvas del GAM y cerrar mostrando tanto las mejoras predictivas como sus limitaciones.
+**Disponibilidad del código y reproducibilidad.** El código fuente, el informe Quarto y los resultados estadísticos agregados de esta investigación se encuentran disponibles en GitHub: https://github.com/Mario-Wladick/Proyecto_ENDES_GAM_2014_2025.
+
+La versión 1.0.0 del proyecto se encuentra archivada permanentemente en Zenodo y puede consultarse mediante el DOI: https://doi.org/10.5281/zenodo.24383832.
+
+El informe es reproducible a partir de los resultados agregados publicados. La reproducción integral desde los microdatos originales ENDES requiere obtener las bases oficiales del INEI y validar la ejecución completa del pipeline de procesamiento y modelado.
 
 ## 18. Referencias esenciales
 
